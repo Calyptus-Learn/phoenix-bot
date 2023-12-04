@@ -38,11 +38,13 @@ export const execute = async () => {
   const marketPubkey = new PublicKey(
     "4DoNfFBfF7UokCC2FQzriy7yHK6DY6NVdYpuekQ5pRgg"
   );
-  const endpoint = "https: //api.mainnet-beta.solana.com";
+  const endpoint = "https://api.mainnet-beta.solana.com";
   const connection = new Connection(endpoint);
+  console.log('Creating connection');
 
   // Create a Phoenix Client
   const client = await phoenixSdk.Client.create(connection);
+  console.log('Created phoenixSdk client');
 
   // Get the market metadata for the market you wish to trade on
   const marketState = client.marketStates.get(marketPubkey.toString());
@@ -51,12 +53,14 @@ export const execute = async () => {
   if (!marketData) {
     throw new Error("Market data not found");
   }
+  console.log(`marketData: ${marketData.toString()}`);
 
   const setupNewMakerIxs = await phoenixSdk.getMakerSetupInstructionsForMarket(
     connection,
     marketState,
     traderKeypair.publicKey
   );
+  console.log(`setupNewMakerIxs length: ${setupNewMakerIxs.length}`);
 
   if (setupNewMakerIxs.length !== 0) {
     const setup = new Transaction().add(...setupNewMakerIxs);
@@ -76,6 +80,7 @@ export const execute = async () => {
 
   do {
     // Before quoting, we cancel all outstanding orders
+    console.log('Before quoting, we cancel all outstanding orders');
     const cancelAll = client.createCancelAllOrdersInstruction(
       marketPubkey.toString(),
       traderKeypair.publicKey
@@ -84,6 +89,7 @@ export const execute = async () => {
     // separately since getting the price could take a non-deterministic amount of time
     try {
       const cancelTransaction = new Transaction().add(cancelAll);
+      console.log('Send cancellation request');
       const txid = await sendAndConfirmTransaction(
         connection,
         cancelTransaction,
@@ -101,7 +107,7 @@ export const execute = async () => {
     }
 
     // Now we can place an order
-
+    console.log('Place order after the cancellation process');
     try {
       // Get current SOL price from Coinbase
       const response = await fetch(
