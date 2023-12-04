@@ -38,7 +38,7 @@ export const execute = async () => {
   const marketPubkey = new PublicKey(
     "4DoNfFBfF7UokCC2FQzriy7yHK6DY6NVdYpuekQ5pRgg"
   );
-  const endpoint = "https: //api.mainnet-beta.solana.com";
+  const endpoint = "https://api.mainnet-beta.solana.com";
   const connection = new Connection(endpoint);
 
   // Create a Phoenix Client
